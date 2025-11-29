@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Explorer - Activity Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f9fafb;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+        .header {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 30px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #6b7280;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+        }
+        .sidebar {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 16px;
+            position: sticky;
+            top: 16px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+        .workflow-btn {
+            width: 100%;
+            text-align: left;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .workflow-btn:hover {
+            background-color: #e5e7eb;
+        }
+        .workflow-btn.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+        .content-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .content-header h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .content-header p {
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .btn-download {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-download:hover {
+            background-color: #059669;
+        }
+        .btn-copy {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-copy:hover {
+            background-color: #2563eb;
+        }
+        .diagram-container {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            background-color: #f9fafb;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            min-height: 400px;
+        }
+        .mermaid {
+            text-align: center;
+            background: white;
+            padding: 20px;
+        }
+        .code-toggle {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .code-toggle:hover {
+            background-color: #e5e7eb;
+        }
+        .code-container {
+            padding: 16px;
+            background-color: #1f2937;
+            border-radius: 6px;
+            overflow-x: auto;
+            display: none;
+        }
+        .code-container.show {
+            display: block;
+        }
+        .code-container pre {
+            color: #10b981;
+            font-size: 14px;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+        }
+        .arrow {
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .arrow.down {
+            transform: rotate(0deg);
+        }
+        .arrow.up {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Blockchain Explorer - Activity Diagrams</h1>
+            <p>Interactive workflow diagrams for all system processes</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <h2>Workflows (<span id="workflow-count">16</span>)</h2>
+                <div id="workflow-list"></div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content">
+                <div class="content-header">
+                    <div>
+                        <h2 id="workflow-name">Select a workflow</h2>
+                        <p id="workflow-id">Workflow #0</p>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-download" onclick="downloadMermaid()">
+                            <span>⬇</span> Download
+                        </button>
+                        <button class="btn btn-copy" onclick="copyMermaid()">
+                            <span>📄</span> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div class="diagram-container">
+                    <div id="mermaid-diagram" class="mermaid"></div>
+                </div>
+
+                <button class="code-toggle" onclick="toggleCode()">
+                    <span>View Mermaid Code</span>
+                    <span class="arrow down" id="arrow">▼</span>
+                </button>
+                <div class="code-container" id="code-container">
+                    <pre><code id="mermaid-code"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        const workflows = [
+            {
+                id: 1,
+                name: "User Registration and Email Verification",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User submits registration form<br/>username, email, password, fullName, phone]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields provided?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> QueryExisting[Query existing user<br/>by email/username]
+    QueryExisting --> CheckUser{User exists?}
+    CheckUser -->|Exists| Error2[Return 'User already exists']
+    CheckUser -->|Not exists| CreateUser[Create user record<br/>email_verified = false<br/>Hash password]
+    CreateUser --> GenCode[Generate 6-digit<br/>verification code]
+    GenCode --> SetExpiry[Set expiration<br/>24 hours from now]
+    SetExpiry --> CreateVerif[Create verification record<br/>in email_verifications<br/>type = 'signup']
+    CreateVerif --> CommitTx[Commit Transaction]
+    CommitTx --> SendEmail[Send verification email<br/>with 6-digit code]
+    SendEmail --> EmailFail{Email<br/>failed?}
+    EmailFail -->|Failed in prod| LogError[Log error<br/>production mode]
+    EmailFail -->|Failed in dev| LogConsole[Log code to console<br/>dev mode]
+    EmailFail -->|Success| ReturnSuccess[Return success response<br/>with user data]
+    LogError --> ReturnSuccess
+    LogConsole --> ReturnSuccess
+    ReturnSuccess --> End([End])
+    Error1 --> End
+    Error2 --> End
+    
+    CreateUser -.->|Error| RollbackTx[Rollback Transaction]
+    RollbackTx --> Error3[Return error]
+    Error3 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style CheckUser fill:#ffeb3b
+    style EmailFail fill:#ffeb3b`
+            },
+            {
+                id: 2,
+                name: "Email Verification",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User submits<br/>verification code]
+    
+    Input --> ValidateInput{Code<br/>provided?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| FindVerif[Find verification record<br/>by token and type='signup']
+    FindVerif -->|Not found| Error2[Return 'Invalid code']
+    FindVerif -->|Found| CheckExpiry{Code<br/>expired?}
+    CheckExpiry -->|Yes| Error3[Return 'Code expired']
+    CheckExpiry -->|No| CheckVerified{Already<br/>verified?}
+    CheckVerified -->|Yes| Error4[Return 'Already verified']
+    CheckVerified -->|No| BeginTx[Begin Transaction]
+    BeginTx --> UpdateUser[Update user<br/>email_verified = true]
+    UpdateUser --> UpdateVerif[Update verification record<br/>verified = true]
+    UpdateVerif --> CommitTx[Commit Transaction]
+    CommitTx --> ReturnSuccess[Return verification<br/>confirmation]
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    Error3 --> End
+    Error4 --> End
+    
+    UpdateUser -.->|Error| RollbackTx[Rollback Transaction]
+    RollbackTx --> Error5[Return error]
+    Error5 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style CheckExpiry fill:#ffeb3b
+    style CheckVerified fill:#ffeb3b`
+            },
+            {
+                id: 3,
+                name: "User Login",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User submits credentials<br/>email/username, password]
+    
+    Input --> ValidateInput{Validate<br/>Input?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| FindUser[Query users table<br/>by email/username]
+    FindUser --> UserFound{User<br/>found?}
+    UserFound -->|No| Error2[Return 'Invalid credentials']
+    UserFound -->|Yes| VerifyPassword{Password<br/>correct?}
+    VerifyPassword -->|No| Error3[Return 'Invalid credentials']
+    VerifyPassword -->|Yes| CheckStatus{Account<br/>active?}
+    CheckStatus -->|Inactive| Error4[Return 'Account not active']
+    CheckStatus -->|Active| Fork{Fork}
+    Fork --> SendNotif[Send login notification email<br/>IP, device, timestamp]
+    Fork --> ReturnData[Return user data<br/>and session info]
+    SendNotif -.->|Error| EmailError[Log email error]
+    SendNotif --> Join{Join}
+    EmailError --> Join
+    ReturnData --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    Error3 --> End
+    Error4 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style VerifyPassword fill:#ffeb3b
+    style CheckStatus fill:#ffeb3b
+    style UserFound fill:#ffeb3b
+    style Fork fill:#333333,color:#ffffff
+    style Join fill:#333333,color:#ffffff`
+            },
+            {
+                id: 4,
+                name: "Wallet Creation",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests wallet creation<br/>label, userId]
+    
+    Input --> ValidateInput{Validate<br/>Input?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| VerifyUser[Query users table<br/>by userId]
+    VerifyUser --> UserExists{User<br/>exists?}
+    UserExists -->|No| Error2[Return 'User not found']
+    UserExists -->|Yes| GenAddress[Generate unique<br/>Ethereum address 0x...]
+    GenAddress --> GenPublicKey[Generate public key]
+    GenPublicKey --> CreateWallet[Insert wallet record<br/>status = 'active'<br/>link to user_id]
+    CreateWallet --> ReturnWallet[Return wallet details<br/>address, label, wallet_id]
+    ReturnWallet --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style UserExists fill:#ffeb3b`
+            },
+            {
+                id: 5,
+                name: "Deposit Tokens",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests deposit<br/>address, tokenId, amount]
+    
+    Input --> ValidateInput{Validate Input<br/>tokenId & amount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> FindWallet[Query wallets by address]
+    FindWallet --> WalletFound{Wallet<br/>found?}
+    WalletFound -->|No| RollbackTx[Rollback Transaction]
+    WalletFound -->|Yes| CheckHolding[Query token_holdings<br/>for wallet_id + token_id]
+    CheckHolding --> HoldingExists{Holding<br/>exists?}
+    HoldingExists -->|Yes| UpdateHolding[Update amount<br/>add to existing]
+    HoldingExists -->|No| InsertHolding[Insert new holding record]
+    UpdateHolding --> CommitTx[Commit Transaction]
+    InsertHolding --> CommitTx
+    CommitTx --> ReturnSuccess[Return deposit<br/>confirmation]
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return error]
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style WalletFound fill:#ffeb3b
+    style HoldingExists fill:#ffeb3b`
+            },
+            {
+                id: 6,
+                name: "Withdraw Tokens",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests withdrawal<br/>address, tokenId, amount, toAddress]
+    
+    Input --> ValidateInput{Validate Input<br/>tokenId & amount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> FindWallet[Query wallets by address]
+    FindWallet --> WalletFound{Wallet<br/>found?}
+    WalletFound -->|No| RollbackTx[Rollback Transaction]
+    WalletFound -->|Yes| CheckBalance[Query token_holdings<br/>for current balance]
+    CheckBalance --> SufficientBalance{Balance >=<br/>amount?}
+    SufficientBalance -->|No| RollbackTx
+    SufficientBalance -->|Yes| UpdateHolding[Subtract amount<br/>from holdings]
+    UpdateHolding --> BalanceZero{New balance<br/>= 0?}
+    BalanceZero -->|Yes| DeleteHolding[Delete holding record]
+    BalanceZero -->|No| UpdateAmount[Update amount]
+    DeleteHolding --> CommitTx[Commit Transaction]
+    UpdateAmount --> CommitTx
+    CommitTx --> ReturnSuccess[Return withdrawal<br/>confirmation]
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return 'Insufficient balance'<br/>or wallet error]
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style WalletFound fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style BalanceZero fill:#ffeb3b`
+            },
+            {
+                id: 7,
+                name: "Transfer Tokens Between Wallets",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests transfer<br/>fromAddress, toAddress, tokenId, amount]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields & amount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> FindSource[Query wallets<br/>by fromAddress]
+    FindSource --> SourceFound{Source<br/>found?}
+    SourceFound -->|No| RollbackTx[Rollback Transaction]
+    SourceFound -->|Yes| FindDest[Query wallets<br/>by toAddress]
+    FindDest --> DestFound{Destination<br/>found?}
+    DestFound -->|No| RollbackTx
+    DestFound -->|Yes| CheckBalance[Query token_holdings<br/>for source wallet]
+    CheckBalance --> SufficientBalance{Balance >=<br/>amount?}
+    SufficientBalance -->|No| RollbackTx
+    SufficientBalance -->|Yes| UpdateSource[Subtract amount<br/>from source holdings]
+    UpdateSource --> CheckDestHolding{Dest holding<br/>exists?}
+    CheckDestHolding -->|Yes| UpdateDest[Update destination<br/>add amount]
+    CheckDestHolding -->|No| InsertDest[Insert new destination<br/>holding]
+    UpdateDest --> CommitTx[Commit Transaction]
+    InsertDest --> CommitTx
+    CommitTx --> ReturnSuccess[Return transfer<br/>confirmation]
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return error<br/>wallet not found or insufficient balance]
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style SourceFound fill:#ffeb3b
+    style DestFound fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style CheckDestHolding fill:#ffeb3b`
+            },
+            {
+                id: 8,
+                name: "Create Blockchain Transaction",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User creates transaction<br/>fromAddress, toAddress, tokenSymbol, amount, method]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields & amount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> FindSource[Query wallets by fromAddress]
+    FindSource --> SourceFound{Source<br/>found?}
+    SourceFound -->|No| RollbackTx[Rollback Transaction]
+    SourceFound -->|Yes| FindDest[Query wallets by toAddress]
+    FindDest --> DestFound{Dest<br/>found?}
+    DestFound -->|No| RollbackTx
+    DestFound -->|Yes| FindToken[Query tokens by tokenSymbol]
+    FindToken --> TokenFound{Token<br/>found?}
+    TokenFound -->|No| RollbackTx
+    TokenFound -->|Yes| CalcFee[Calculate fee<br/>fee = amount * 0.001]
+    CalcFee --> CalcTotal[Calculate total required<br/>totalRequired = amount + fee]
+    CalcTotal --> ValidateBalance[Call validate_wallet_balance]
+    ValidateBalance --> BalanceOK{Sufficient<br/>balance?}
+    BalanceOK -->|No| RollbackTx
+    BalanceOK -->|Yes| GetBlock[Get latest block_id]
+    GetBlock --> GenHash[Generate transaction hash<br/>unique 0x...]
+    GenHash --> CreateTx[Create transaction record<br/>status = 'pending']
+    CreateTx --> UpdateSource[Subtract totalRequired<br/>from source]
+    UpdateSource --> CheckDestHolding{Dest holding<br/>exists?}
+    CheckDestHolding -->|Yes| UpdateDest[Update destination<br/>add amount]
+    CheckDestHolding -->|No| InsertDest[Insert destination holding]
+    UpdateDest --> UpdateStatus[Update transaction<br/>status = 'confirmed']
+    InsertDest --> UpdateStatus
+    UpdateStatus --> CommitTx[Commit Transaction]
+    CommitTx --> GetUsers[Query users for<br/>sender and receiver emails]
+    GetUsers --> Fork{Fork}
+    Fork --> SendSenderEmail[Send email to sender]
+    Fork --> SendReceiverEmail[Send email to receiver]
+    SendSenderEmail --> Join{Join}
+    SendReceiverEmail --> Join
+    Join --> ReturnTx[Return transaction details]
+    ReturnTx --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return error with details]
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style SourceFound fill:#ffeb3b
+    style DestFound fill:#ffeb3b
+    style TokenFound fill:#ffeb3b
+    style BalanceOK fill:#ffeb3b
+    style CheckDestHolding fill:#ffeb3b
+    style Fork fill:#333333,color:#ffffff
+    style Join fill:#333333,color:#ffffff`
+            },
+            {
+                id: 9,
+                name: "P2P Order Creation",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User creates P2P order<br/>userId, tokenId, orderType, amount, price,<br/>paymentMethod, minLimit, maxLimit]
+    
+    Input --> ValidateInput{Validate Input<br/>All required fields?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| CalcTotal[Calculate total<br/>total = amount * price]
+    CalcTotal --> IsSellOrder{Order type<br/>= 'sell'?}
+    IsSellOrder -->|No| BeginTx[Begin Transaction]
+    IsSellOrder -->|Yes| ValidateBalance[Query token_holdings<br/>for user's wallet]
+    ValidateBalance --> SufficientBalance{Sufficient<br/>balance?}
+    SufficientBalance -->|No| RollbackTx[Rollback Transaction]
+    SufficientBalance -->|Yes| BeginTx
+    BeginTx --> CreateOrder[Insert into p2p_orders<br/>status = 'active']
+    CreateOrder --> CommitTx[Commit Transaction]
+    CommitTx --> ReturnOrder[Return order details]
+    ReturnOrder --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return 'Insufficient balance']
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style IsSellOrder fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b`
+            },
+            {
+                id: 10,
+                name: "P2P Transaction Request",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[Buyer creates P2P request<br/>buyerId, sellerId, tokenId, amount, price]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields provided?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| CheckSelfTx{buyerId =<br/>sellerId?}
+    CheckSelfTx -->|Yes| Error2[Return 'Cannot trade with yourself']
+    CheckSelfTx -->|No| BeginTx[Begin Transaction]
+    BeginTx --> ValidateBalance[Query token_holdings<br/>for seller]
+    ValidateBalance --> SufficientBalance{Sufficient<br/>balance?}
+    SufficientBalance -->|No| RollbackTx[Rollback Transaction]
+    SufficientBalance -->|Yes| CalcTotal[Calculate total<br/>total = amount * price]
+    CalcTotal --> CreateP2PTx[Insert into p2p_transactions<br/>status = 'pending']
+    CreateP2PTx --> CommitTx[Commit Transaction]
+    CommitTx --> GetUsers[Query users for<br/>buyer and seller emails]
+    GetUsers --> CreateEmailVerif[Create email verification<br/>record for seller]
+    CreateEmailVerif --> Fork{Fork}
+    Fork --> SendBuyerEmail[Send notification<br/>to buyer]
+    Fork --> SendSellerEmail[Send notification<br/>to seller]
+    SendBuyerEmail --> Join{Join}
+    SendSellerEmail --> Join
+    Join --> ReturnTx[Return transaction details]
+    ReturnTx --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    RollbackTx --> Error3[Return 'Insufficient seller balance']
+    Error3 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style CheckSelfTx fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style Fork fill:#333333,color:#ffffff
+    style Join fill:#333333,color:#ffffff`
+            },
+            {
+                id: 11,
+                name: "P2P Transaction Acceptance",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[Seller accepts P2P transaction<br/>transactionId, userId]
+    
+    Input --> GetTx[Query p2p_transactions<br/>by transactionId]
+    GetTx --> TxFound{Transaction<br/>found?}
+    TxFound -->|No| Error1[Return 'Transaction not found']
+    TxFound -->|Yes| CheckAuth{userId is<br/>seller?}
+    CheckAuth -->|No| Error2[Return 'Not authorized']
+    CheckAuth -->|Yes| CheckStatus{Status =<br/>'pending'?}
+    CheckStatus -->|No| Error3[Return 'Transaction not pending']
+    CheckStatus -->|Yes| BeginTx[Begin Transaction]
+    BeginTx --> ValidateBalance[Check seller has<br/>sufficient tokens]
+    ValidateBalance --> SufficientBalance{Sufficient<br/>balance?}
+    SufficientBalance -->|No| RollbackTx[Rollback Transaction]
+    SufficientBalance -->|Yes| UpdateStatus[Update transaction<br/>status = 'paid']
+    UpdateStatus --> UpdateEmailVerif[Mark email verification<br/>as read]
+    UpdateEmailVerif --> CommitTx[Commit Transaction]
+    CommitTx --> GetUsers[Query users for<br/>buyer and seller]
+    GetUsers --> Fork{Fork}
+    Fork --> SendBuyerEmail[Send acceptance<br/>notification to buyer]
+    Fork --> SendSellerEmail[Send acceptance<br/>notification to seller]
+    SendBuyerEmail --> Join{Join}
+    SendSellerEmail --> Join
+    Join --> ReturnUpdated[Return updated transaction]
+    ReturnUpdated --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    Error3 --> End
+    RollbackTx --> Error4[Return 'Insufficient balance']
+    Error4 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style CheckAuth fill:#ffeb3b
+    style CheckStatus fill:#ffeb3b
+    style TxFound fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style Fork fill:#333333,color:#ffffff
+    style Join fill:#333333,color:#ffffff`
+            },
+            {
+                id: 12,
+                name: "P2P Token Transfer",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[Seller transfers tokens<br/>transactionId, userId]
+    
+    Input --> GetTx[Query p2p_transactions<br/>with buyer/seller info]
+    GetTx --> TxFound{Transaction<br/>found?}
+    TxFound -->|No| Error1[Return 'Transaction not found']
+    TxFound -->|Yes| CheckAuth{userId is<br/>seller?}
+    CheckAuth -->|No| Error2[Return 'Not authorized']
+    CheckAuth -->|Yes| CheckStatus{Status =<br/>'paid'?}
+    CheckStatus -->|No| Error3[Return 'Transaction not paid']
+    CheckStatus -->|Yes| BeginTx[Begin Transaction]
+    BeginTx --> GetWallets[Query wallets for<br/>buyer and seller]
+    GetWallets --> ValidateBalance[Check seller has<br/>sufficient tokens]
+    ValidateBalance --> SufficientBalance{Sufficient<br/>balance?}
+    SufficientBalance -->|No| RollbackTx[Rollback Transaction]
+    SufficientBalance -->|Yes| UpdateSeller[Subtract amount from<br/>seller holdings]
+    UpdateSeller --> CheckBuyerHolding{Buyer holding<br/>exists?}
+    CheckBuyerHolding -->|Yes| UpdateBuyer[Update buyer holdings<br/>add amount]
+    CheckBuyerHolding -->|No| InsertBuyer[Insert buyer holding]
+    UpdateBuyer --> CreateBlockchainTx[Insert into transactions<br/>method = 'p2p_transfer'<br/>status = 'confirmed']
+    InsertBuyer --> CreateBlockchainTx
+    CreateBlockchainTx --> UpdateP2PStatus[Update p2p_transactions<br/>status = 'completed']
+    UpdateP2PStatus --> CommitTx[Commit Transaction]
+    CommitTx --> GetUsers[Query users for<br/>buyer and seller]
+    GetUsers --> Fork{Fork}
+    Fork --> SendBuyerEmail[Send completion<br/>notification to buyer]
+    Fork --> SendSellerEmail[Send completion<br/>notification to seller]
+    SendBuyerEmail --> Join{Join}
+    SendSellerEmail --> Join
+    Join --> ReturnCompleted[Return completed transaction]
+    ReturnCompleted --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    Error3 --> End
+    RollbackTx --> Error4[Return 'Insufficient balance']
+    Error4 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style CheckAuth fill:#ffeb3b
+    style CheckStatus fill:#ffeb3b
+    style TxFound fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style Fork fill:#333333,color:#ffffff
+    style Join fill:#333333,color:#ffffff`
+            },
+            {
+                id: 13,
+                name: "Market Buy with USDT",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests market buy<br/>userId, tokenId, usdtAmount]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields & usdtAmount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| BeginTx[Begin Transaction]
+    BeginTx --> FindUSDT[Query tokens for USDT]
+    FindUSDT --> USDTFound{USDT<br/>found?}
+    USDTFound -->|No| RollbackTx[Rollback Transaction]
+    USDTFound -->|Yes| FindTargetToken[Query tokens by tokenId]
+    FindTargetToken --> TargetFound{Target token<br/>found?}
+    TargetFound -->|No| RollbackTx
+    TargetFound -->|Yes| GetWallet[Query wallets for userId]
+    GetWallet --> WalletFound{Wallet<br/>found?}
+    WalletFound -->|No| RollbackTx
+    WalletFound -->|Yes| CheckUSDTBalance[Query token_holdings<br/>for USDT balance]
+    CheckUSDTBalance --> SufficientUSDT{USDT balance >=<br/>usdtAmount?}
+    SufficientUSDT -->|No| RollbackTx
+    SufficientUSDT -->|Yes| CalcTokenAmount[Calculate tokens to receive<br/>tokensToReceive = usdtAmount / targetPrice]
+    CalcTokenAmount --> CalcFee[Calculate fee<br/>fee = tokensToReceive * 0.003]
+    CalcFee --> CalcFinal[Calculate final amount<br/>finalTokens = tokensToReceive - fee]
+    CalcFinal --> UpdateUSDT[Subtract usdtAmount<br/>from USDT holdings]
+    UpdateUSDT --> USDTZero{New USDT<br/>balance = 0?}
+    USDTZero -->|Yes| DeleteUSDT[Delete USDT holding]
+    USDTZero -->|No| UpdateUSDTAmount[Update USDT amount]
+    DeleteUSDT --> CheckTargetHolding{Target holding<br/>exists?}
+    UpdateUSDTAmount --> CheckTargetHolding
+    CheckTargetHolding -->|Yes| UpdateTarget[Update target token<br/>add finalTokens]
+    CheckTargetHolding -->|No| InsertTarget[Insert target token holding]
+    UpdateTarget --> GenHash[Generate transaction hash<br/>unique 0x...]
+    InsertTarget --> GenHash
+    GenHash --> CreateTx[Insert into transactions<br/>method = 'market_buy'<br/>status = 'confirmed']
+    CreateTx --> CommitTx[Commit Transaction]
+    CommitTx --> GetUser[Query user email]
+    GetUser --> SendEmail[Send purchase notification<br/>with purchase details]
+    SendEmail --> ReturnPurchase[Return purchase details]
+    ReturnPurchase --> End([End])
+    
+    Error1 --> End
+    RollbackTx --> Error2[Return error<br/>insufficient USDT or invalid token]
+    Error2 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style USDTFound fill:#ffeb3b
+    style TargetFound fill:#ffeb3b
+    style WalletFound fill:#ffeb3b
+    style SufficientUSDT fill:#ffeb3b
+    style USDTZero fill:#ffeb3b
+    style CheckTargetHolding fill:#ffeb3b`
+            },
+            {
+                id: 14,
+                name: "Token Conversion/Swap",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests token swap<br/>userId, fromTokenId, toTokenId, amount]
+    
+    Input --> ValidateInput{Validate Input<br/>All fields & amount > 0?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| CheckSameToken{fromTokenId =<br/>toTokenId?}
+    CheckSameToken -->|Yes| Error2[Return 'Cannot convert to itself']
+    CheckSameToken -->|No| BeginTx[Begin Transaction]
+    BeginTx --> GetWallet[Query wallets for userId]
+    GetWallet --> WalletFound{Wallet<br/>found?}
+    WalletFound -->|No| RollbackTx[Rollback Transaction]
+    WalletFound -->|Yes| GetTokens[Query tokens for<br/>both tokens]
+    GetTokens --> TokensFound{Both tokens<br/>found?}
+    TokensFound -->|No| RollbackTx
+    TokensFound -->|Yes| CheckSourceBalance[Query token_holdings<br/>for source token]
+    CheckSourceBalance --> SufficientBalance{Balance >=<br/>amount?}
+    SufficientBalance -->|No| RollbackTx
+    SufficientBalance -->|Yes| CalcConversion[Calculate conversion<br/>usdValue = amount * fromPrice<br/>outputAmount = usdValue / toPrice]
+    CalcConversion --> CalcFee[Calculate fee<br/>fee = outputAmount * 0.003]
+    CalcFee --> CalcFinal[Calculate final output<br/>finalOutput = outputAmount - fee]
+    CalcFinal --> UpdateSource[Subtract amount<br/>from source holdings]
+    UpdateSource --> SourceZero{New source<br/>balance = 0?}
+    SourceZero -->|Yes| DeleteSource[Delete source holding]
+    SourceZero -->|No| UpdateSourceAmount[Update source amount]
+    DeleteSource --> CheckDestHolding{Dest holding<br/>exists?}
+    UpdateSourceAmount --> CheckDestHolding
+    CheckDestHolding -->|Yes| UpdateDest[Update destination<br/>add finalOutput]
+    CheckDestHolding -->|No| InsertDest[Insert destination holding]
+    UpdateDest --> GenHashes[Generate two transaction hashes<br/>for outgoing and incoming]
+    InsertDest --> GenHashes
+    GenHashes --> CreateOutTx[Insert outgoing transaction<br/>method = 'swap_out'<br/>amount = -amount]
+    CreateOutTx --> CreateInTx[Insert incoming transaction<br/>method = 'swap_in'<br/>amount = finalOutput]
+    CreateInTx --> CommitTx[Commit Transaction]
+    CommitTx --> GetUser[Query user email]
+    GetUser --> SendEmail[Send conversion notification<br/>with conversion details]
+    SendEmail --> ReturnConversion[Return conversion details]
+    ReturnConversion --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    RollbackTx --> Error3[Return error<br/>insufficient balance or invalid tokens]
+    Error3 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style CheckSameToken fill:#ffeb3b
+    style WalletFound fill:#ffeb3b
+    style TokensFound fill:#ffeb3b
+    style SufficientBalance fill:#ffeb3b
+    style SourceZero fill:#ffeb3b
+    style CheckDestHolding fill:#ffeb3b`
+            },
+            {
+                id: 15,
+                name: "Request Account Deletion",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests deletion code<br/>userId]
+    
+    Input --> FindUser[Query users table]
+    FindUser --> ValidateUser{User<br/>found?}
+    ValidateUser -->|No| Error1[Return 'User not found']
+    ValidateUser -->|Yes| BeginTx[Begin Transaction]
+    BeginTx --> DeleteOldCodes[Delete existing unverified<br/>deletion codes]
+    DeleteOldCodes --> GenCode[Generate 6-digit code]
+    GenCode --> SetExpiry[Set expiration<br/>15 minutes from now]
+    SetExpiry --> CreateVerif[Insert into email_verifications<br/>type = 'account_deletion']
+    CreateVerif --> CommitTx[Commit Transaction]
+    CommitTx --> GetUserInfo[Query user email and name]
+    GetUserInfo --> SendEmail[Send deletion code email<br/>with 6-digit code]
+    SendEmail -.->|Error| EmailError[Log email error]
+    SendEmail --> ReturnSuccess[Return confirmation]
+    EmailError --> ReturnSuccess
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateUser fill:#ffeb3b`
+            },
+            {
+                id: 16,
+                name: "Account Deletion",
+                mermaid: `flowchart TD
+    Start([Start]) --> Input[User requests account deletion<br/>userId, code]
+    
+    Input --> ValidateInput{Code<br/>provided?}
+    ValidateInput -->|Invalid| Error1[Return validation error]
+    ValidateInput -->|Valid| FindVerif[Find verification record<br/>by user_id, token, type='account_deletion']
+    FindVerif --> VerifFound{Verification<br/>found?}
+    VerifFound -->|No| Error2[Return 'Invalid code']
+    VerifFound -->|Yes| CheckExpiry{Code<br/>expired?}
+    CheckExpiry -->|Yes| Error3[Return 'Code expired']
+    CheckExpiry -->|No| BeginTx[Begin Transaction]
+    BeginTx --> DeleteUser[Delete from users table<br/>CASCADE deletes:<br/>- All wallets<br/>- All token holdings<br/>- All P2P orders<br/>- All email verifications]
+    DeleteUser --> CommitTx[Commit Transaction]
+    CommitTx --> SendConfirmation[Send deletion confirmation email]
+    SendConfirmation --> ReturnSuccess[Return deletion confirmation]
+    ReturnSuccess --> End([End])
+    
+    Error1 --> End
+    Error2 --> End
+    Error3 --> End
+    DeleteUser -.->|Error| RollbackTx[Rollback Transaction]
+    RollbackTx --> Error4[Return error]
+    Error4 --> End
+    
+    style Start fill:#000000,color:#ffffff
+    style End fill:#000000,color:#ffffff
+    style ValidateInput fill:#ffeb3b
+    style VerifFound fill:#ffeb3b
+    style CheckExpiry fill:#ffeb3b`
+            }
+        ];
+
+        let currentWorkflow = 0;
+
+        // Initialize sidebar
+        function initSidebar() {
+            const list = document.getElementById('workflow-list');
+            workflows.forEach((workflow, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'workflow-btn';
+                btn.textContent = `${workflow.id}. ${workflow.name}`;
+                btn.onclick = () => selectWorkflow(index);
+                list.appendChild(btn);
+            });
+        }
+
+        // Select workflow
+        function selectWorkflow(index) {
+            currentWorkflow = index;
+            const workflow = workflows[index];
+            
+            // Update header
+            document.getElementById('workflow-name').textContent = workflow.name;
+            document.getElementById('workflow-id').textContent = `Workflow #${workflow.id}`;
+            
+            // Update sidebar buttons
+            const buttons = document.querySelectorAll('.workflow-btn');
+            buttons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update code display
+            document.getElementById('mermaid-code').textContent = workflow.mermaid;
+            
+            // Render diagram
+            renderDiagram(workflow.mermaid);
+        }
+
+        // Render Mermaid diagram
+        function renderDiagram(mermaidCode) {
+            const diagramDiv = document.getElementById('mermaid-diagram');
+            
+            // Clear previous content completely
+            diagramDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Loading diagram...</div>';
+            
+            // Create a unique ID for this diagram
+            const diagramId = 'mermaid-' + Date.now();
+            
+            // Use mermaid.render() to generate SVG
+            mermaid.render(diagramId, mermaidCode.trim()).then((result) => {
+                diagramDiv.innerHTML = result.svg;
+                console.log('Diagram rendered successfully');
+            }).catch(err => {
+                console.error('Error rendering diagram:', err);
+                diagramDiv.innerHTML = '<div style="color: red; padding: 20px; text-align: left;"><p><strong>Error rendering diagram:</strong> ' + err.message + '</p><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; margin-top: 10px; font-size: 12px;">' + mermaidCode + '</pre></div>';
+            });
+        }
+
+        // Download Mermaid file
+        function downloadMermaid() {
+            const workflow = workflows[currentWorkflow];
+            const blob = new Blob([workflow.mermaid], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${workflow.name.replace(/\s+/g, '_')}.mmd`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Copy to clipboard
+        function copyMermaid() {
+            const workflow = workflows[currentWorkflow];
+            navigator.clipboard.writeText(workflow.mermaid).then(() => {
+                alert('Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        // Toggle code view
+        function toggleCode() {
+            const container = document.getElementById('code-container');
+            const arrow = document.getElementById('arrow');
+            container.classList.toggle('show');
+            arrow.classList.toggle('up');
+            arrow.classList.toggle('down');
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initSidebar();
+            selectWorkflow(0);
+        };
+    </script>
+</body>
+</html>
